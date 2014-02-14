@@ -1,0 +1,56 @@
+//          Copyright Malcolm Noyes 2013-2014.
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          http://www.boost.org/LICENSE_1_0.txt)
+
+#include "catch.hpp"
+#include "any_bridge.hpp"
+
+namespace ab = any_bridge;
+
+namespace
+{
+    struct TestCallInterface
+    {
+        virtual ~TestCallInterface() {}
+        virtual int f0() const = 0;
+        virtual int f1(int) const = 0;
+    };
+}
+
+namespace any_bridge
+{
+    //
+    // forwarder<any<...> > doesn't *need* any methods defined....
+    // (unless you want to use them...)
+    //
+    template <>
+    class forwarder<any<interfaces<TestCallInterface> > >
+    {
+    public:
+        // no methods
+    };
+
+    template <typename Derived, typename Base, typename ValueType>
+    class value_type_operations : public Base
+    {
+    public:
+        virtual int f0() const { return static_cast<const Derived*>(this)->held;}
+        virtual int f1(int t1) const {return static_cast<const Derived*>(this)->held + t1;}
+    };
+}
+
+namespace AnyCallUnitTests
+{
+    TEST_CASE("Require call zero params call f0", "[call]")
+    {
+        ab::any<ab::interfaces<TestCallInterface> > a(1);
+        REQUIRE(a.call(&TestCallInterface::f0) == 1);
+    }
+
+    TEST_CASE("Require call one param call f1", "[call]")
+    {
+        ab::any<ab::interfaces<TestCallInterface> > a(1);
+        REQUIRE(a.call(&TestCallInterface::f1, 2) == 3);
+    }
+}

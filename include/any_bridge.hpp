@@ -354,6 +354,33 @@ namespace any_bridge
             return *this;
         }
 
+        template <typename Function>
+        struct call_forwarder
+        {
+            call_forwarder(placeholder* obj, Function f)
+                : content(obj), fn(f)
+            {}
+            // interface forwarding, allow up to 10 params
+            typename member_function_traits<Function>::result_type fwd()
+            {
+                return (content->*fn)();
+            }
+
+            typename member_function_traits<Function>::result_type with(
+                typename member_function_traits<Function>::arg1_type t1)
+            {
+                return (content->*fn)(t1);
+            }
+            placeholder* content;
+            Function fn;
+        };
+
+        template <typename Function>
+        call_forwarder<Function> callf(Function fn)
+        {
+            return call_forwarder<Function>(content, fn);
+        }
+
         // interface forwarding, allow up to 10 params
         template <typename Function>
         typename member_function_traits<Function>::result_type call(Function fn)

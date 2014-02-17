@@ -86,6 +86,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\any_bridge.hpp" />
+    <ClInclude Include="..\..\include\call_with.hpp" />
     <ClInclude Include="..\..\include\member_function_traits.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />

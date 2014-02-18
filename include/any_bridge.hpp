@@ -6,8 +6,9 @@
 #ifndef ANY_BRIDGE_HPP_INCLUDED
 #define ANY_BRIDGE_HPP_INCLUDED
 
-#include "member_function_traits.hpp"
 #include "call_with.hpp"
+#include <cstddef>
+#include <utility>
 
 #ifdef ANY_BRIDGE_USE_RTTI
 #include <typeinfo>

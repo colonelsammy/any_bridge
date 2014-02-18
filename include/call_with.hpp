@@ -6,6 +6,8 @@
 #ifndef ANY_BRIDGE_CALL_WITH_HPP_INCLUDED
 #define ANY_BRIDGE_CALL_WITH_HPP_INCLUDED
 
+#include "member_function_traits.hpp"
+
 namespace any_bridge
 {
     // interface forwarding, allow up to 10 params

@@ -129,13 +129,13 @@ namespace any_bridge
     //
     struct not_comparable
     {
-        template <typename T>
-        struct compare
+        template <typename T, typename Interface>
+        struct compare : public Interface
         {
             virtual ~compare() {}
         };
         template <typename Derived, typename T>
-        struct compare2 : public T
+        struct compare_impl : public T
         {
             typedef T PlaceholderType;
         };
@@ -145,14 +145,14 @@ namespace any_bridge
     //
     struct equality_comparable
     {
-        template <typename T>
-        struct compare
+        template <typename T, typename Interface>
+        struct compare : public Interface
         {
             virtual ~compare() {}
             virtual bool equals(const T& other) const = 0;
         };
         template <typename Derived, typename T>
-        struct compare2 : public T
+        struct compare_impl : public T
         {
             typedef T PlaceholderType;
             virtual bool equals(const T& other) const
@@ -177,14 +177,14 @@ namespace any_bridge
     //
     struct less_than_comparable
     {
-        template <typename T>
-        struct compare
+        template <typename T, typename Interface>
+        struct compare : public Interface
         {
             virtual ~compare() {}
             virtual bool less(const T& other) const = 0;
         };
         template <typename Derived, typename T>
-        struct compare2 : public T
+        struct compare_impl : public T
         {
             typedef T PlaceholderType;
             virtual bool less(const T& other) const
@@ -209,14 +209,17 @@ namespace any_bridge
     //
     // comparability for equals and less...
     //
-    struct less_than_equals_comparable : public equality_comparable, public less_than_comparable
+    struct less_than_equals_comparable
     {
-        template <typename T>
-        struct compare : public equality_comparable::compare<T>, public less_than_comparable::compare<T>
+        template <typename T, typename Interface>
+        struct compare : public Interface
         {
+            virtual ~compare() {}
+            virtual bool equals(const T& other) const = 0;
+            virtual bool less(const T& other) const = 0;
         };
         template <typename Derived, typename T>
-        struct compare2 : public T
+        struct compare_impl : public T
         {
             typedef T PlaceholderType;
             virtual bool equals(const T& other) const
@@ -263,9 +266,6 @@ namespace any_bridge
     struct interfaces : public I0, public I1, public I2, public I3, public I4, public I5, public I6
     {};
 
-    template <typename Interface, typename Comparable>
-    class any;
-
     template <typename Interface = interfaces<>, typename Comparable = less_than_equals_comparable>
     class any : public forwarder<any<Interface,Comparable> >
     {
@@ -274,7 +274,7 @@ namespace any_bridge
     public:
         typedef any AnyType;
     private:
-        class placeholder : public Interface, public Comparable::template compare<placeholder>
+        class placeholder : public Comparable::template compare<placeholder, Interface>
         {
         public: // queries
             virtual type_info<any> type() const  = 0;
@@ -286,10 +286,10 @@ namespace any_bridge
         // so we use CRTP to enforce this condition
         //
         template<typename T>
-        class holder : public value_type_operations<holder<T>, typename Comparable::template compare2<holder<T>,placeholder>, T>
+        class holder : public value_type_operations<holder<T>, typename Comparable::template compare_impl<holder<T>,placeholder>, T>
         {
             // CRTP base class has access to 'held'
-            friend class value_type_operations<holder<T>, typename Comparable::template compare2<holder<T>,placeholder>, T>;
+            friend class value_type_operations<holder<T>, typename Comparable::template compare_impl<holder<T>,placeholder>, T>;
         public: // structors
             typedef any AnyType;
             typedef T ValueType;
@@ -297,6 +297,7 @@ namespace any_bridge
             explicit holder(const ValueType & v)
                 : held(v)
             {
+                //std::cout << "size=" << sizeof(holder<T>) << ", " << sizeof(T) << ", " << __alignof(holder<T>) << std::endl;
             }
 
         public: // queries

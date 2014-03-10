@@ -4,6 +4,7 @@
 //          http://www.boost.org/LICENSE_1_0.txt)
 
 #include "catch.hpp"
+#define ANY_BRIDGE_CALL_WITH (1)
 #include "any_bridge.hpp"
 
 namespace ab = any_bridge;

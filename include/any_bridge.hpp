@@ -6,7 +6,9 @@
 #ifndef ANY_BRIDGE_HPP_INCLUDED
 #define ANY_BRIDGE_HPP_INCLUDED
 
+#ifdef ANY_BRIDGE_CALL_WITH
 #include "call_with.hpp"
+#endif
 #include <cstddef>
 #include <utility>
 
@@ -358,11 +360,13 @@ namespace any_bridge
             return *this;
         }
 
+#ifdef ANY_BRIDGE_CALL_WITH
         template <typename Function>
         call_with<placeholder, Function, member_function_traits<Function>::arity> call(Function fn)
         {
             return call_with<placeholder, Function, member_function_traits<Function>::arity>(content, fn);
         }
+#endif
 
     public: // queries
 
